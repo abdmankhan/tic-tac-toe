@@ -1,0 +1,15 @@
+1. let loopSquares;
+  loopSquares = () =>{
+    let rows = new Array();
+    for(let i = 0; i < 3; i++){
+      let cols = new Array();
+      
+      for(let j = 3 * i; j < 3 * (i + 1); j++){
+        cols.push(<Square value={squares[0]} onClick={() => handleClick(0)} />);
+      }
+      rows.push(<div className="board-row">{cols}</div>);
+      //This is correct way.
+    }
+}
+
+2. 
