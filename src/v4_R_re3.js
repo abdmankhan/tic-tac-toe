@@ -10,14 +10,22 @@ export default function Game(){
   // const currSquares = history[history.length - 1];
   const currSquares = history[currentMove].squares;
 
+  // to remove yellow color after win if somebody jumped back to previous state...
+  // const [reColor, setReColor] = useState(true);
+  const [winCood, setWinCood] = useState(Array(3).fill(null));
+
+
   function handlePlay(nextSquares, cood){
     const nextHistory = [...history, {squares : nextSquares, cood : cood}];
+    // setReColor(true);
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
     
   }
   function jumpTo(nextMove){
     const newHistory = history.slice(0, nextMove + 1);
+    // setReColor(false);
+    setWinCood([null, null, null]);
     setHistory(newHistory);
     setCurrentMove(nextMove);
   }
@@ -54,7 +62,10 @@ export default function Game(){
         <Board 
         xIsNext={xIsNext} 
         squares={currSquares} 
-        onPlay={handlePlay} />
+        onPlay={handlePlay}
+        winCood = {winCood}
+        setWinCood = {setWinCood}
+         />
       </div>
       <div className="game-info">
         <div className="status">Moves History</div>
@@ -69,8 +80,7 @@ export default function Game(){
   );
 }
 
-function Board({squares, xIsNext, onPlay}){
-  const [winCood, setWinCood] = useState(Array(3).fill(null));
+function Board({ squares, xIsNext, onPlay, winCood, setWinCood }){
   
   function handleClick(i){
     
@@ -80,11 +90,16 @@ function Board({squares, xIsNext, onPlay}){
     else newSquares[i] = 'O';
     const cood = [Math.floor(i / 3), i % 3];
     onPlay(newSquares, cood);
+
+    const updatedWinner = calculateWinner(newSquares);
+    if(updatedWinner){
+      setWinCood(updatedWinner.winCood);
+    }
   }
-  const winner = calculateWinner(squares, winCood, setWinCood);
+  const winner = calculateWinner(squares);
   let status;
   if(winner){
-    status = " Winner is : " + (winner);
+    status = " Winner is : " + (winner.player);
   } else {
     status = " Next is : " + (xIsNext ? 'X' : 'O');
   }
@@ -121,17 +136,15 @@ function Square({value, onClick, sentColor}){
   );
 }
 
-function calculateWinner(squares, winCood, setWinCood){
+function calculateWinner(squares){
   let lines = [
     [0,1,2], [3,4,5], [6,7,8], [0,4,8], [2,4,6], [0,3,6], [1,4,7], [2,5,8]
   ];
   for(let i = 0; i < lines.length; i++){
     const [a,b,c] = lines[i];
     if(squares[a] && squares[a] == squares[b] && squares[a] == squares[c]){
-      if(winCood[0] === null){
-        setWinCood([a,b,c]);
-      }
-      return squares[a];
+      
+      return {player : squares[a], winCood : [a,b,c]};
     }
   }
   return null;
